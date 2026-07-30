@@ -57,12 +57,12 @@ export default function Header({ form }: HeaderProps) {
               updateField(form.id, LaptopFields.HOSTNAME, value);
               updateTitle(form.id, value);
             }}
-            // action={{
-            //   label: "Scan from Image",
-            //   onPress: () => {
-            //     // OCR implementation later
-            //   },
-            // }}
+            action={{
+              label: "Scan from Image",
+              onPress: () => {
+                // OCR implementation later
+              },
+            }}
           />
         </Column>
 

@@ -11,6 +11,7 @@ import {
 
 import { useForms } from "@/src/context/FormContext";
 import { createLaptopTemplate } from "@/src/templates/laptop";
+import { createUnboxingTemplate } from "@/src/templates/unboxing";
 
 function CustomDrawer(props: DrawerContentComponentProps) {
   const { forms, createForm } = useForms();
@@ -24,6 +25,21 @@ function CustomDrawer(props: DrawerContentComponentProps) {
 
     router.push({
       pathname: "/(drawer)/laptop/[id]",
+      params: {
+        id: form.id,
+      },
+    });
+  };
+
+  const createUnboxingForm = () => {
+    const form = createUnboxingTemplate();
+
+    createForm(form);
+
+    props.navigation.closeDrawer();
+
+    router.push({
+      pathname: "/(drawer)/unboxing/[id]",
       params: {
         id: form.id,
       },
@@ -63,7 +79,7 @@ function CustomDrawer(props: DrawerContentComponentProps) {
       {/* ---------- Fixed Tabs ---------- */}
 
       <View style={styles.fixedTabs}>
-        <Pressable style={styles.tab}>
+        <Pressable style={styles.tab} onPress={createUnboxingForm}>
           <Text>Create Unboxing Form</Text>
         </Pressable>
 
@@ -131,32 +147,32 @@ function CustomDrawer(props: DrawerContentComponentProps) {
                   });
                   break;
 
-                // case "ce":
-                //   router.push({
-                //     pathname: "/(drawer)/ce/[id]",
-                //     params: {
-                //       id: form.id,
-                //     },
-                //   });
-                //   break;
+                case "ce":
+                  router.push({
+                    pathname: "/(drawer)/ce/[id]",
+                    params: {
+                      id: form.id,
+                    },
+                  });
+                  break;
 
-                // case "unboxing":
-                //   router.push({
-                //     pathname: "/(drawer)/unboxing/[id]",
-                //     params: {
-                //       id: form.id,
-                //     },
-                //   });
-                //   break;
+                case "unboxing":
+                  router.push({
+                    pathname: "/(drawer)/unboxing/[id]",
+                    params: {
+                      id: form.id,
+                    },
+                  });
+                  break;
 
-                // case "yubikey":
-                //   router.push({
-                //     pathname: "/(drawer)/yubikey/[id]",
-                //     params: {
-                //       id: form.id,
-                //     },
-                //   });
-                //   break;
+                case "yubikey":
+                  router.push({
+                    pathname: "/(drawer)/yubikey/[id]",
+                    params: {
+                      id: form.id,
+                    },
+                  });
+                  break;
               }
             }}
           >

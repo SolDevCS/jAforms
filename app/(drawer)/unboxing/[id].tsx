@@ -4,12 +4,10 @@ import { Pressable, Text } from "react-native";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 
 import { useForms } from "@/src/context/FormContext";
+import Unboxing from "@/src/forms/unboxing/Unboxing";
 
-import FormCarousel from "@/src/components/FormCarousel";
 
-import { laptopPages } from "../../../src/forms/laptop";
-
-export default function LaptopFormPage() {
+export default function UnboxingFormPage() {
   const navigation = useNavigation();
 
   const { id } = useLocalSearchParams<{
@@ -48,5 +46,5 @@ export default function LaptopFormPage() {
     return <Text>Form not found.</Text>;
   }
 
-  return <FormCarousel form={form} pages={laptopPages} />;
+  return <Unboxing form={form} />;
 }
