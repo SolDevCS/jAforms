@@ -9,7 +9,7 @@ interface FormCarouselProps {
     key: string;
     title: string;
     component: React.ComponentType<any>;
-    requiredFields: readonly string[];
+    requiredFields?: readonly string[];
   }[];
 
   form: any;
