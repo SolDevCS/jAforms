@@ -3,8 +3,17 @@ import React, {
   useContext,
   useState,
   ReactNode,
+  useEffect,
 } from "react";
 import { supabase } from "../lib/supabase";
+import { mapLaptopToRow } from "../mappers/laptopRowMapper";
+import { mapRowToLaptop } from "../mappers/rowLaptopMapper";
+import {
+  createLaptop,
+  deleteLaptop,
+  getLaptops,
+  updateLaptop,
+} from "../services/laptopService";
 
 /* ---------- Types ---------- */
 
@@ -28,6 +37,8 @@ interface FormContextType {
   updateForm: (form: FormDocument) => Promise<void>;
   deleteForm: (id: string) => Promise<void>;
 
+  loadForms: () => Promise<void>;
+
   updateTitle: (id: string, title: string) => void;
 
   updateField: (id: string, path: string, value: any) => void;
@@ -44,7 +55,6 @@ interface FormContextType {
   ) => void;
 
   removeArrayItem: (id: string, path: string, index: number) => void;
-
 }
 
 /* ---------- Helper ---------- */
@@ -75,8 +85,6 @@ function setNestedValue(obj: any, path: string, value: any) {
   return copy;
 }
 
-
-
 /* ---------- Context ---------- */
 
 function getNestedValue(obj: any, path: string) {
@@ -93,42 +101,32 @@ export function FormProvider({ children }: { children: ReactNode }) {
   const createForm = async (form: FormDocument) => {
     setForms((prev) => [form, ...prev]);
 
-    if (form.type !== "laptop") return;
+    switch (form.type) {
+      case "laptop":
+        await createLaptop(form);
+        break;
 
-    console.log(form)
+      // case "ce":
+      //   await createCE(form);
+      //   break;
 
-    const { error } = await supabase.from("laptop_forms").insert({
-      id: form.id,
-      title: form.title,
-      created_at: new Date(form.createdAt).toISOString(),
-      modified_at: new Date(form.modifiedAt).toISOString(),
+      // case "unboxing":
+      //   await createUnboxing(form);
+      //   break;
 
-      data: form.content,
-    });
-
-    if (error) {
-      console.error(error);
+      // case "yubikey":
+      //   await createYubiKey(form);
+      //   break;
     }
   };
 
-  const updateForm = async (updatedForm: FormDocument) => {
-    setForms((prev) =>
-      prev.map((form) => (form.id === updatedForm.id ? updatedForm : form)),
-    );
+  const updateForm = async (form: FormDocument) => {
+    setForms((prev) => prev.map((f) => (f.id === form.id ? form : f)));
 
-    if (updatedForm.type !== "laptop") return;
-
-    const { error } = await supabase
-      .from("laptop_forms")
-      .update({
-        title: updatedForm.title,
-        modified_at: new Date().toISOString(),
-        data: updatedForm.content,
-      })
-      .eq("id", updatedForm.id);
-
-    if (error) {
-      console.error(error);
+    switch (form.type) {
+      case "laptop":
+        await updateLaptop(form);
+        break;
     }
   };
 
@@ -161,17 +159,34 @@ export function FormProvider({ children }: { children: ReactNode }) {
   };
 
   const deleteForm = async (id: string) => {
+    const form = getForm(id);
+
+    if (!form) return;
+
     setForms((prev) => prev.filter((f) => f.id !== id));
 
-    const { error } = await supabase.from("laptop_forms").delete().eq("id", id);
-
-    if (error) {
-      console.error(error);
+    switch (form.type) {
+      case "laptop":
+        await deleteLaptop(id);
+        break;
     }
   };
 
   const getForm = (id: string) => {
     return forms.find((form) => form.id === id);
+  };
+
+  const loadForms = async () => {
+    const { data, error } = await getLaptops();
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setForms(data.map(mapRowToLaptop));
+    console.log(JSON.stringify(data[0], null, 2));
+    console.log(JSON.stringify(mapRowToLaptop(data[0]), null, 2));
   };
 
   const appendToArray = (id: string, path: string, value: any) => {
@@ -220,11 +235,16 @@ export function FormProvider({ children }: { children: ReactNode }) {
     updateTitle,
     updateField,
     deleteForm,
+    loadForms,
     getForm,
     appendToArray,
     updateArrayItem,
     removeArrayItem,
   };
+
+  useEffect(() => {
+    void loadForms();
+  }, []);
 
   return <FormContext.Provider value={value}>{children}</FormContext.Provider>;
 }
