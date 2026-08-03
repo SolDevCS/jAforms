@@ -74,7 +74,7 @@ export function createLaptopTemplate(): FormDocument {
 
       memory: "",
 
-      sn: "",
+      serial_number: "",
 
       // =========================
       // Screen
@@ -151,7 +151,7 @@ export function createLaptopTemplate(): FormDocument {
       health: {
         battery: {
           condition: "",
-          percentage: "",
+          percentage: "100",
           remark: "",
         },
 
@@ -161,12 +161,12 @@ export function createLaptopTemplate(): FormDocument {
         storage: {
           hdd: {
             condition: "",
-            percentage: "",
+            percentage: 100,
             remark: "",
           },
           ssd: {
             condition: "",
-            percentage: "",
+            percentage: 100,
             remark: "",
           },
         },

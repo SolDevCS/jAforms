@@ -85,7 +85,7 @@ export default function DeviceDetails({ form }: DeviceDetailsProps) {
       </Row>
       <TextField
         title="Serial Number:"
-        value={form.content.sn}
+        value={form.content.serial_number}
         onChange={(value) => {
           updateField(form.id, LaptopFields.SERIAL_NUMBER, value);
         }}

@@ -4,6 +4,7 @@ import React, {
   useState,
   ReactNode,
 } from "react";
+import { supabase } from "../lib/supabase";
 
 /* ---------- Types ---------- */
 
@@ -23,15 +24,13 @@ export interface FormDocument<T = any> {
 interface FormContextType {
   forms: FormDocument[];
 
-  createForm: (form: FormDocument) => void;
-
-  updateForm: (form: FormDocument) => void;
+  createForm: (form: FormDocument) => Promise<void>;
+  updateForm: (form: FormDocument) => Promise<void>;
+  deleteForm: (id: string) => Promise<void>;
 
   updateTitle: (id: string, title: string) => void;
 
   updateField: (id: string, path: string, value: any) => void;
-
-  deleteForm: (id: string) => void;
 
   getForm: (id: string) => FormDocument | undefined;
 
@@ -45,6 +44,7 @@ interface FormContextType {
   ) => void;
 
   removeArrayItem: (id: string, path: string, index: number) => void;
+
 }
 
 /* ---------- Helper ---------- */
@@ -74,6 +74,9 @@ function setNestedValue(obj: any, path: string, value: any) {
 
   return copy;
 }
+
+
+
 /* ---------- Context ---------- */
 
 function getNestedValue(obj: any, path: string) {
@@ -87,14 +90,46 @@ const FormContext = createContext<FormContextType | null>(null);
 export function FormProvider({ children }: { children: ReactNode }) {
   const [forms, setForms] = useState<FormDocument[]>([]);
 
-  const createForm = (form: FormDocument) => {
+  const createForm = async (form: FormDocument) => {
     setForms((prev) => [form, ...prev]);
+
+    if (form.type !== "laptop") return;
+
+    console.log(form)
+
+    const { error } = await supabase.from("laptop_forms").insert({
+      id: form.id,
+      title: form.title,
+      created_at: new Date(form.createdAt).toISOString(),
+      modified_at: new Date(form.modifiedAt).toISOString(),
+
+      data: form.content,
+    });
+
+    if (error) {
+      console.error(error);
+    }
   };
 
-  const updateForm = (updatedForm: FormDocument) => {
+  const updateForm = async (updatedForm: FormDocument) => {
     setForms((prev) =>
       prev.map((form) => (form.id === updatedForm.id ? updatedForm : form)),
     );
+
+    if (updatedForm.type !== "laptop") return;
+
+    const { error } = await supabase
+      .from("laptop_forms")
+      .update({
+        title: updatedForm.title,
+        modified_at: new Date().toISOString(),
+        data: updatedForm.content,
+      })
+      .eq("id", updatedForm.id);
+
+    if (error) {
+      console.error(error);
+    }
   };
 
   const updateTitle = (id: string, title: string) => {
@@ -125,8 +160,14 @@ export function FormProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const deleteForm = (id: string) => {
-    setForms((prev) => prev.filter((form) => form.id !== id));
+  const deleteForm = async (id: string) => {
+    setForms((prev) => prev.filter((f) => f.id !== id));
+
+    const { error } = await supabase.from("laptop_forms").delete().eq("id", id);
+
+    if (error) {
+      console.error(error);
+    }
   };
 
   const getForm = (id: string) => {

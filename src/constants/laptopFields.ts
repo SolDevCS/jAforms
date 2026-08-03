@@ -60,7 +60,7 @@ export const LaptopFields = {
   MEMORY: "memory",
   SLOTS: "slots",
 
-  SERIAL_NUMBER: "sn",
+  SERIAL_NUMBER: "serial_number",
 
   // =====================================================
   // Screen
@@ -212,6 +212,4 @@ export const LaptopFields = {
   ENGINEER_SIGNATURE: "engr.signature",
 
   ENGINEER_DATE: "engr.date",
-
-
 } as const;
