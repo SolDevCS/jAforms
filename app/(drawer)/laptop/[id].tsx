@@ -1,5 +1,5 @@
 import React, { useLayoutEffect } from "react";
-import { Pressable, Text } from "react-native";
+import { Alert, Pressable, Text } from "react-native";
 
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 
@@ -8,7 +8,6 @@ import { useForms } from "@/src/context/FormContext";
 import FormCarousel from "@/src/components/FormCarousel";
 
 import { laptopPages } from "../../../src/forms/laptop";
-import { createLaptop } from "@/src/services/laptopService";
 
 export default function LaptopFormPage() {
   const navigation = useNavigation();
@@ -17,7 +16,7 @@ export default function LaptopFormPage() {
     id: string;
   }>();
 
-  const { getForm } = useForms();
+  const { getForm, createForm, loading, error } = useForms();
 
   const form = getForm(id);
 
@@ -29,23 +28,21 @@ export default function LaptopFormPage() {
 
       headerRight: () => (
         <Pressable
+          disabled={loading}
           onPress={async () => {
+            if (!form) return;
+
             try {
-              const result = await createLaptop(form);
-
-              console.log(result);
-
-              if (result.error) {
-                console.error(result.error);
-              } else {
-                console.log("Uploaded!");
-              }
+              await createForm(form);
             } catch (err) {
-              console.error(err);
+              Alert.alert(
+                "Upload failed",
+                err instanceof Error ? err.message : "Unknown error",
+              );
             }
           }}
         >
-          <Text style={{ color: "#1976D2", fontWeight: "600" }}>Export</Text>
+          <Text>{loading ? "Uploading..." : "Export"}</Text>
         </Pressable>
       ),
     });
@@ -55,5 +52,11 @@ export default function LaptopFormPage() {
     return <Text>Form not found.</Text>;
   }
 
-  return <FormCarousel form={form} pages={laptopPages} />;
+  return (
+    <>
+      {error && <Text style={{ color: "red" }}>{error}</Text>}
+
+      <FormCarousel form={form} pages={laptopPages} />
+    </>
+  );
 }

@@ -8,12 +8,7 @@ import React, {
 import { supabase } from "../lib/supabase";
 import { mapLaptopToRow } from "../mappers/laptopRowMapper";
 import { mapRowToLaptop } from "../mappers/rowLaptopMapper";
-import {
-  createLaptop,
-  deleteLaptop,
-  getLaptops,
-  updateLaptop,
-} from "../services/laptopService";
+import { LaptopService } from "../services/laptopService";
 
 /* ---------- Types ---------- */
 
@@ -33,11 +28,16 @@ export interface FormDocument<T = any> {
 interface FormContextType {
   forms: FormDocument[];
 
+  loading: boolean;
+  error: string | null;
+
   // General form operations
   createForm: (form: FormDocument) => Promise<void>;
   updateForm: (form: FormDocument) => Promise<void>;
   deleteForm: (id: string) => Promise<void>;
-  loadForms: () => Promise<void>; // Load all forms from the database
+
+  loadForms: () => Promise<void>; // Load all forms from the database, has to go elsewhere
+
   getForm: (id: string) => FormDocument | undefined; // Load Form into [id]
   updateField: (id: string, path: string, value: any) => void;
 
@@ -62,13 +62,12 @@ interface FormContextType {
 
   // TL
   // exportAsFolder:
-  
+
   // QA & TL
   // addComment:
   // getComment:
   // updateComment:
   // deleteComment:
-
 }
 
 /* ---------- Helper ---------- */
@@ -112,25 +111,31 @@ const FormContext = createContext<FormContextType | null>(null);
 export function FormProvider({ children }: { children: ReactNode }) {
   const [forms, setForms] = useState<FormDocument[]>([]);
 
-  const createForm = async (form: FormDocument) => {
-    setForms((prev) => [form, ...prev]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    switch (form.type) {
-      case "laptop":
-        await createLaptop(form);
-        break;
+  const createForm = async (form: FormDocument): Promise<void> => {
+    setLoading(true);
+    setError(null);
 
-      // case "ce":
-      //   await createCE(form);
-      //   break;
+    try {
+      setForms((prev) => [form, ...prev]);
 
-      // case "unboxing":
-      //   await createUnboxing(form);
-      //   break;
+      switch (form.type) {
+        case "laptop":
+          await LaptopService.create(form);
+          break;
+        
+        // ce, yubikey, unboxing can be added here in the future
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
 
-      // case "yubikey":
-      //   await createYubiKey(form);
-      //   break;
+      setError(message);
+
+      throw err;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,7 +144,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
 
     switch (form.type) {
       case "laptop":
-        await updateLaptop(form);
+        await LaptopService.update(form);
         break;
     }
   };
@@ -181,7 +186,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
 
     switch (form.type) {
       case "laptop":
-        await deleteLaptop(id);
+        await LaptopService.delete(id);
         break;
     }
   };
@@ -191,7 +196,7 @@ export function FormProvider({ children }: { children: ReactNode }) {
   };
 
   const loadForms = async () => {
-    const { data, error } = await getLaptops();
+    const { data, error } = await LaptopService.getAll();
 
     if (error) {
       console.error(error);
@@ -244,6 +249,8 @@ export function FormProvider({ children }: { children: ReactNode }) {
 
   const value: FormContextType = {
     forms,
+    loading,
+    error,
     createForm,
     updateForm,
     updateTitle,
