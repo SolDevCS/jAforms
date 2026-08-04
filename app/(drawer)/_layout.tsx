@@ -2,18 +2,20 @@ import React from "react";
 import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 
 import { Drawer } from "expo-router/drawer";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
 } from "@react-navigation/drawer";
 
-import { useForms } from "@/src/context/FormContext";
+import { FormProvider, useForms } from "@/src/context/FormContext";
 import { createLaptopTemplate } from "@/src/templates/laptop";
 import { createUnboxingTemplate } from "@/src/templates/unboxing";
+import { useAuth } from "@/src/context/AuthContext";
 
 function CustomDrawer(props: DrawerContentComponentProps) {
+
   const { forms, createForm } = useForms();
 
   const createLaptopForm = () => {
@@ -185,63 +187,69 @@ function CustomDrawer(props: DrawerContentComponentProps) {
 }
 
 export default function DrawerLayout() {
+  const { user } = useAuth();
+  if (!user) {
+    return <Redirect href="/(auth)/login" />;
+  }
   return (
-    <Drawer
-      drawerContent={(props) => <CustomDrawer {...props} />}
-      screenOptions={{
-        headerTitleAlign: "center",
-      }}
-    >
-      <Drawer.Screen
-        name="index"
-        options={{
-          title: "Home",
+    <FormProvider>
+      <Drawer
+        drawerContent={(props) => <CustomDrawer {...props} />}
+        screenOptions={{
+          headerTitleAlign: "center",
         }}
-      />
+      >
+        <Drawer.Screen
+          name="index"
+          options={{
+            title: "Home",
+          }}
+        />
 
-      <Drawer.Screen
-        name="settings"
-        options={{
-          title: "Settings",
-        }}
-      />
+        <Drawer.Screen
+          name="settings"
+          options={{
+            title: "Settings",
+          }}
+        />
 
-      <Drawer.Screen
-        name="laptop/[id]"
-        options={{
-          drawerItemStyle: {
-            display: "none",
-          },
-        }}
-      />
+        <Drawer.Screen
+          name="laptop/[id]"
+          options={{
+            drawerItemStyle: {
+              display: "none",
+            },
+          }}
+        />
 
-      <Drawer.Screen
-        name="ce/[id]"
-        options={{
-          drawerItemStyle: {
-            display: "none",
-          },
-        }}
-      />
+        <Drawer.Screen
+          name="ce/[id]"
+          options={{
+            drawerItemStyle: {
+              display: "none",
+            },
+          }}
+        />
 
-      <Drawer.Screen
-        name="unboxing/[id]"
-        options={{
-          drawerItemStyle: {
-            display: "none",
-          },
-        }}
-      />
+        <Drawer.Screen
+          name="unboxing/[id]"
+          options={{
+            drawerItemStyle: {
+              display: "none",
+            },
+          }}
+        />
 
-      <Drawer.Screen
-        name="yubikey/[id]"
-        options={{
-          drawerItemStyle: {
-            display: "none",
-          },
-        }}
-      />
-    </Drawer>
+        <Drawer.Screen
+          name="yubikey/[id]"
+          options={{
+            drawerItemStyle: {
+              display: "none",
+            },
+          }}
+        />
+      </Drawer>
+    </FormProvider>
   );
 }
 

@@ -33,18 +33,15 @@ export interface FormDocument<T = any> {
 interface FormContextType {
   forms: FormDocument[];
 
+  // General form operations
   createForm: (form: FormDocument) => Promise<void>;
   updateForm: (form: FormDocument) => Promise<void>;
   deleteForm: (id: string) => Promise<void>;
-
-  loadForms: () => Promise<void>;
-
-  updateTitle: (id: string, title: string) => void;
-
+  loadForms: () => Promise<void>; // Load all forms from the database
+  getForm: (id: string) => FormDocument | undefined; // Load Form into [id]
   updateField: (id: string, path: string, value: any) => void;
 
-  getForm: (id: string) => FormDocument | undefined;
-
+  // Footer Remarks Operations
   appendToArray: (id: string, path: string, value: any) => void;
 
   updateArrayItem: (
@@ -55,6 +52,23 @@ interface FormContextType {
   ) => void;
 
   removeArrayItem: (id: string, path: string, index: number) => void;
+
+  // Engr
+  updateTitle: (id: string, title: string) => void;
+  // assignToQA:
+
+  // QA
+  // assignToTL:
+
+  // TL
+  // exportAsFolder:
+  
+  // QA & TL
+  // addComment:
+  // getComment:
+  // updateComment:
+  // deleteComment:
+
 }
 
 /* ---------- Helper ---------- */
@@ -85,11 +99,11 @@ function setNestedValue(obj: any, path: string, value: any) {
   return copy;
 }
 
-/* ---------- Context ---------- */
-
 function getNestedValue(obj: any, path: string) {
   return path.split(".").reduce((current, key) => current?.[key], obj);
 }
+
+/* ---------- Context ---------- */
 
 const FormContext = createContext<FormContextType | null>(null);
 
